@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id         String      @id @default(uuid())
+  name       String
+  userId     String
+  billboard  Billboard[] @relation("StoreToBillborad")
+  categories Category[]  @relation("StoreToCategory")
+  size       Size[]      @relation("StoreToSize")
+  color      Color[]     @relation("StoreToColor")
+  product    Product[]   @relation("StoreToProduct")
+  order      Order[]     @relation("StoreToOrder")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+// testing===================
+model Post {
+  id       Int     @id @default(autoincrement())
+  authorId Int
+  author   User    @relation(fields: [authorId], references: [id])
+  content  String?
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String
+  posts Post[]
+  role  Role
+}
+
+model Billboard {
+  id         String     @id @default(uuid())
+  storeId    String
+  store      Store      @relation("StoreToBillborad", fields: [storeId], references: [id])
+  categories Category[]
+  label      String
+  imageUrl   String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([storeId])
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  storeId     String
+  store       Store     @relation("StoreToCategory", fields: [storeId], references: [id])
+  product     Product[] @relation("CategoryToProduct")
+  billboardId String
+  billboard   Billboard @relation(fields: [billboardId], references: [id])
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([storeId])
+  @@index([billboardId])
+}
+
+model Size {
+  id        String    @id @default(uuid())
+  storeId   String
+  store     Store     @relation("StoreToSize", fields: [storeId], references: [id])
+  product   Product[] @relation("SizeToProduct")
+  name      String
+  value     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([storeId])
+}
+
+model Color {
+  id        String    @id @default(uuid())
+  storeId   String
+  store     Store     @relation("StoreToColor", fields: [storeId], references: [id])
+  product   Product[] @relation("ColorToProduct")
+  name      String
+  value     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([storeId])
+}
+
+model Product {
+  id         String       @id @default(uuid())
+  storeId    String
+  store      Store        @relation("StoreToProduct", fields: [storeId], references: [id])
+  categoryId String
+  category   Category     @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  name       String
+  price      Decimal
+  isFeatured Boolean      @default(false)
+  isArchived Boolean      @default(false)
+  sizeId     String
+  size       Size         @relation("SizeToProduct", fields: [sizeId], references: [id])
+  colorId    String
+  color      Color        @relation("ColorToProduct", fields: [colorId], references: [id])
+  image      Image[]      @relation("ProductToImage")
+  orderItem  OrderItems[] @relation()
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([storeId])
+  @@index([categoryId])
+  @@index([sizeId])
+  @@index([colorId])
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation("ProductToImage", fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model Order {
+  id         String       @id @default(uuid())
+  storeId    String
+  store      Store        @relation("StoreToOrder", fields: [storeId], references: [id])
+  orderItems OrderItems[] @relation()
+  isPaid     Boolean      @default(false)
+  name       String
+  phone      String       @default("")
+  address    String       @default("")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([storeId])
+}
+
+model OrderItems {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId, productId])
+}
+
+enum Role {
+  Intern
+  engineer
+  admin
+}
