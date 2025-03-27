@@ -143,12 +143,29 @@ export class ProductService {
         productId: id,
       },
     });
+    const deleteOrderItem = this.db.orderItems.deleteMany({
+      where: {
+        productId: id,
+      },
+    });
     const deleteProduct = this.db.product.delete({
       where: {
         id,
       },
     });
-    // const prisma = new PrismaClient()``
-    return await this.db.$transaction([deleteImage, deleteProduct]);
+    return await this.db.$transaction([
+      deleteImage,
+      deleteOrderItem,
+      deleteProduct,
+    ]);
+  }
+
+  async removeAll() {
+    // const deleteImage = this.db.image.deleteMany({});
+    // const deleteProduct = this.db.product.deleteMany({});
+    const deleteOrder = this.db.order.deleteMany({});
+    // const deleteOrderItem = this.db.orderItems.deleteMany({});
+    return this.db.order.deleteMany({});
+    // return Promise.all([deleteImage, deleteProduct, deleteOrderItem]);
   }
 }
