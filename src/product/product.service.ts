@@ -1,3 +1,4 @@
+import { query } from 'express';
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -95,6 +96,20 @@ export class ProductService {
         color: true,
       },
     });
+  }
+  async getProductBySearchKeyword(query: { keyword: string }) {
+    const results = await this.db.product.findMany({
+      where: {
+        name: { contains: query.keyword, mode: 'insensitive' },
+      },
+      include: {
+        image: true,
+        category: true,
+        size: true,
+        color: true,
+      },
+    });
+    return results;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
