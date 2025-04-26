@@ -1,3 +1,4 @@
+import { Product } from './entities/product.entity';
 import { query } from 'express';
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -129,7 +130,7 @@ export class ProductService {
       },
     });
     console.log('imageDelete ', imageDelete);
-    const imageUpdate = images.map((item) => {
+    const imageUpdate = images?.map((item) => {
       return { url: item.url, productId: id };
     });
     const imageCreate = await this.db.image.createMany({
@@ -182,5 +183,36 @@ export class ProductService {
     // const deleteOrderItem = this.db.orderItems.deleteMany({});
     return this.db.order.deleteMany({});
     // return Promise.all([deleteImage, deleteProduct, deleteOrderItem]);
+  }
+
+  async updateThumnail() {
+    const products = await this.db.product.findMany({
+      where: {},
+      include: {
+        image: true,
+      },
+    });
+
+    products.map(async (product) => {
+      await this.db.product.update({
+        where: { id: product.id },
+        data: {
+          thumnailUrl: product.image[0].url.replace(
+            'upload',
+            'upload/w_400,h_400,c_fit/',
+          ),
+        },
+      });
+    });
+    return this.db.product.findMany();
+    // return products.map((product) => {
+    //   return {
+    //     ...product,
+    //     thumnailUrl: product.image[0].url.replace(
+    //       'upload',
+    //       'upload/w_400,h_400,c_fit/',
+    //     ),
+    //   };
+    // });
   }
 }

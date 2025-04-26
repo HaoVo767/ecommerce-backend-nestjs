@@ -58,11 +58,6 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(id, updateProductDto);
-  }
-
   @Delete('/removeAll')
   removeAll() {
     return this.productService.removeAll();
@@ -71,5 +66,14 @@ export class ProductController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productService.remove(id);
+  }
+
+  @Patch('updateThumnail')
+  updateThumnail() {
+    return this.productService.updateThumnail();
+  }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    return this.productService.update(id, updateProductDto);
   }
 }
